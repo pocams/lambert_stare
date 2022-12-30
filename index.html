@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>:lambert_stare:</title>
+    <style>
+        @media (min-aspect-ratio: 1/1) {
+            #choices { display: none; }
+        }
+
+        @media (max-aspect-ratio: 1/1) {
+            #eyes { display: none; }
+        }
+
+        body {
+            background-color: #999;
+            padding: 0;
+            margin: 0;
+        }
+
+        div#choices {
+            background-color: #999;
+        }
+
+        div#eyes {
+            overflow: clip;
+            background-color: #60596a;
+            white-space: nowrap;
+        }
+
+        /* lamb face: #60596a */
+
+        .eye {
+            display: inline;
+            width: 50vw;
+            height: 100vh;
+            object-fit: contain;
+        }
+
+        .eye-tears.left-tears {
+            position: absolute;
+            left: 9vw;
+            top: 55vh;
+            width: 35vw;
+            height: 42vh;
+        }
+
+        .eye-tears.right-tears {
+            position: absolute;
+            left: 60vw;
+            top: 55vh;
+            width: 35vw;
+            height: 42vh;
+        }
+
+        .flipped {
+            transform: scale(-1, 1);
+        }
+
+        div.head {
+            background: url("images/player/HeadBack.png");
+            background-repeat: no-repeat;
+            width: 162px;
+            height: 141px;
+            display: inline-block;
+            position: relative;
+            margin: 5px;
+            border: 5px solid transparent;
+            border-radius: 2px;
+        }
+
+        div.face {
+            background: url("images/player/HeadFront.png");
+            position: absolute;
+            top: 30px;
+            left: 10px;
+            width: 125px;
+            height: 87px;
+        }
+
+        div.face .left-eye {
+            position: absolute;
+            bottom: 12px;
+            left: -5px;
+        }
+
+        div.face .right-eye {
+            position: absolute;
+            bottom: 12px;
+            left: 60px;
+        }
+
+        div.face .face-mouth {
+            position: absolute;
+            top: 60px;
+            left: 33px;
+            z-index: 3;
+        }
+
+        div.face .left-tears {
+            position: absolute;
+            top: 40px;
+            left: 7px;
+            z-index: 2;
+        }
+
+        div.face .right-tears {
+            position: absolute;
+            top: 40px;
+            left: 71px;
+            z-index: 2;
+        }
+
+        div.head .head-tuft {
+            position: absolute;
+            top: 30px;
+            left: 43px;
+            z-index: 1;
+        }
+
+        div.head.selected {
+            background-color: #bbb;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+        }
+    </style>
+    <script>
+        const FACES = [
+            {
+                "name": "normal",
+                "left": "images/player/EYE.png",
+                "right": "images/player/EYE.png",
+            },
+            {
+                "name": "happy",
+                "left": "images/player/EYE_HAPPY.png",
+                "right": "images/player/EYE_HAPPY.png",
+            },
+            {
+                "name": "red",
+                "left": "images/player/EYE_RED.png",
+                "right": "images/player/EYE_RED.png",
+                "mouth": "images/player/MOUTH_TALK2.png",
+            },
+            {
+                "name": "goo",
+                "left": "images/player/EYE_RED.png",
+                "right": "images/player/EYE_RED.png",
+                "tears": "images/player/eye_blood.png",
+                "mouth": "images/player/MOUTH_TALK1.png",
+            },
+            {
+                "name": "worried",
+                "left": "images/player/EYE_WORRIED_LEFT.png",
+                "right": "images/player/EYE_WORRIED_RIGHT.png",
+                "mouth": "images/player/MOUTH_SAD.png",
+            }
+
+        ]
+
+        function pickFace(face) {
+            // console.log("pick %o", face)
+            let eyes = document.querySelector("#eyes")
+            eyes.querySelector(".left-eye").src = face.left
+            eyes.querySelector(".right-eye").src = face.right
+            if (face.left_flipped) {
+                eyes.querySelector(".left-eye").classList.add("flipped")
+            } else {
+                eyes.querySelector(".left-eye").classList.remove("flipped")
+            }
+
+            if (face.right_flipped) {
+                eyes.querySelector(".right").classList.add("flipped")
+            } else {
+                eyes.querySelector(".right-eye").classList.remove("flipped")
+            }
+
+            if (face.tears) {
+                eyes.querySelectorAll(".eye-tears").forEach(e => {
+                    e.style.display = null
+                    e.src = face.tears
+                })
+            } else {
+                eyes.querySelectorAll(".eye-tears").forEach(e => e.style.display = "none")
+            }
+
+            document.querySelectorAll(".head").forEach(e => e.classList.remove("selected"))
+            document.querySelector("#face-" + face.name).classList.add("selected")
+        }
+    </script>
+</head>
+<body>
+    <div id="choices">
+        <img src="images/pick-a-face.png" alt="Pick a face then turn your phone sideways" style="width: 90vw; margin-left: 5vw;">
+    </div>
+    <div id="eyes">
+        <img src="images/player/EYE.png" class="eye left-eye">
+        <img class="eye-tears left-tears" style="display: none">
+        <img src="images/player/EYE.png" class="eye right-eye">
+        <img class="eye-tears right-tears" style="display: none">
+    </div>
+</body>
+
+<template id="face">
+    <div class="head">
+        <img class="head-tuft" src="images/player/HairTuft.png">
+        <div class="face">
+            <img class="face-eye left-eye">
+            <img class="face-eye right-eye">
+            <img class="face-tears left-tears">
+            <img class="face-tears right-tears">
+            <img class="face-mouth">
+        </div>
+    </div>
+</template>
+
+<script>
+    const choicesDiv = document.querySelector("div#choices")
+    const template = document.querySelector("template#face")
+    // console.log("template %o", template)
+    for (const face of FACES) {
+        let faceTemplate = template.content.cloneNode(true)
+        // console.log("face %o", faceTemplate)
+        faceTemplate.querySelector(".left-eye").src = face.left
+        faceTemplate.querySelector(".right-eye").src = face.right
+        faceTemplate.querySelector(".face-mouth").src = face.mouth || "images/player/MOUTH_NORMAL.png"
+        if (face.tears) {
+            faceTemplate.querySelector(".left-tears").src = face.tears
+            faceTemplate.querySelector(".right-tears").src = face.tears
+        } else {
+            faceTemplate.querySelectorAll(".face-tears").forEach(el => el.remove())
+        }
+        faceTemplate.querySelector("div").id = "face-" + face.name;
+        faceTemplate.querySelector("div").addEventListener("click", ev => pickFace(face))
+        choicesDiv.append(faceTemplate)
+    }
+
+    pickFace(FACES[3])
+</script>
+</html>
